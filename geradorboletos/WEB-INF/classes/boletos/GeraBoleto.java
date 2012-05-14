@@ -97,7 +97,7 @@ public class GeraBoleto
                 titulo.setDataDoDocumento(new Date());
                 titulo.setDataDoVencimento(new Date());
                 titulo.setTipoDeDocumento(TipoDeTitulo.DM_DUPLICATA_MERCANTIL);
-                titulo.setAceite(EnumAceite.A);
+                titulo.setEnumAceite(EnumAceite.A);
                 titulo.setDesconto(new BigDecimal(0.05));
                 titulo.setDeducao(BigDecimal.ZERO);
                 titulo.setMora(BigDecimal.ZERO);

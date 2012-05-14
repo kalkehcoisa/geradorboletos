@@ -23,12 +23,12 @@
     </servlet-mapping>
     
     <servlet>
-        <servlet-name>boletoBradesco</servlet-name>
-        <servlet-class>servlets.boletoBradesco</servlet-class>
+        <servlet-name>helloServlet</servlet-name>
+        <servlet-class>mypackage.HelloServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>boletoBradesco</servlet-name>
-        <url-pattern>/bradesco/*</url-pattern>
+        <servlet-name>helloServlet</servlet-name>
+        <url-pattern>/helloservlet</url-pattern>
     </servlet-mapping>
 </web-app>
