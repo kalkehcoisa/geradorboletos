@@ -19,7 +19,7 @@
     
     <servlet>
         <servlet-name>boletoBradesco</servlet-name>
-        <servlet-class>minhas.servlets.boletoBradesco</servlet-class>
+        <servlet-class>servlets.boletoBradesco</servlet-class>
     </servlet>
 
     <servlet-mapping>
