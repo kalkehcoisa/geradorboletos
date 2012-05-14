@@ -12,11 +12,6 @@
 	based on the recommendations of the Application Developer's Guide.
     </description>
 
-    <servlet>
-        <servlet-name>hello</servlet-name>
-        <servlet-class>mypackage.Hello</servlet-class>
-    </servlet>
-
     <servlet-mapping>
         <servlet-name>hello</servlet-name>
         <url-pattern>/hello</url-pattern>
@@ -24,7 +19,7 @@
     
     <servlet>
         <servlet-name>boletoBradesco</servlet-name>
-        <servlet-class>servlets.boletoBradesco</servlet-class>
+        <servlet-class>minhas.servlets.boletoBradesco</servlet-class>
     </servlet>
 
     <servlet-mapping>
