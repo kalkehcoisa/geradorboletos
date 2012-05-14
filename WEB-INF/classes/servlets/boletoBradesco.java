@@ -2,6 +2,8 @@ package servlets;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.http.*;
@@ -117,8 +119,8 @@ public class boletoBradesco extends HttpServlet
         titulo.setNossoNumero(titulo_nossonumero);
         titulo.setDigitoDoNossoNumero(titulo_digitodonossonumero);
         titulo.setValor(BigDecimal(titulo_valor));
-        titulo.setDataDoDocumento(new Date(titulo_datadodocumento));
-        titulo.setDataDoVencimento(new Date(titulo_datadovencimento));
+        titulo.setDataDoDocumento(Date(titulo_datadodocumento));
+        titulo.setDataDoVencimento(Date(titulo_datadovencimento));
         titulo.setTipoDeDocumento(TipoDeTitulo.DM_DUPLICATA_MERCANTIL);
         titulo.setAceite(EnumAceite.A);
         titulo.setDesconto(new BigDecimal(titulo_desconto));
@@ -148,6 +150,31 @@ public class boletoBradesco extends HttpServlet
 	
 	
 	
+	private static BigDecimal BigDecimal(String value)
+	{
+		// TODO Auto-generated method stub
+		return BigDecimal.valueOf( Double.parseDouble(value) );
+	}
+
+	private static Date Date(String data)
+	{
+		// TODO Auto-generated method stub 
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		try
+		{
+			Date date = sdf.parse(data);
+			return date;
+		}
+		catch (ParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return new Date();
+		}
+	}
+
+
+
 	public void doGet (HttpServletRequest req, HttpServletResponse res)
 	throws ServletException, IOException
 	{
