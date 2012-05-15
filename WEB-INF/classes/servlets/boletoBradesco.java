@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 
@@ -42,7 +41,7 @@ import org.jrimum.domkee.financeiro.banco.febraban.Titulo.EnumAceite;
 public class boletoBradesco extends HttpServlet
 {
     /**
-	 * 
+	 * Servlet responsavel por tratar da geracao e armazenamento de boletos do bradesco.
 	 */
 	private static final long serialVersionUID = 1L;
 	private static final int PERMALINK_LENGTH = 40;
@@ -54,6 +53,11 @@ public class boletoBradesco extends HttpServlet
 	
 	public static String recebePost(HttpServletRequest request) throws SQLException
     {
+		/**
+		 * Este metodo recebe os dados via post para a geracao de um boleto, os armazena no
+		 * banco de dados e retorna o permalink para ser acesso via URL.
+		 */
+
 		String empresa_id = "1";
 		
 		//INFORMANDO DADOS SOBRE O CEDENTE.
@@ -151,6 +155,7 @@ public class boletoBradesco extends HttpServlet
 			boleto_instrucao5+"\', \'"+boleto_instrucao6+"\', \'"+boleto_instrucao7+"\', \'"+boleto_instrucao8+"\', \'"+
 			permalink+"\')";
 
+		//tenta inserir os dados no banco ate que o permalink gerado atual seja aceito 
 		boolean teste_permalink = true;
 		while( teste_permalink )
 		{
@@ -175,8 +180,12 @@ public class boletoBradesco extends HttpServlet
     }
 
 
-	public static Boleto geraBoleto(String permalink) throws SQLException
+	public static Boleto geraBoleto(String permalink) throws SQLException, NoBoletoException
     {
+		/**
+		 * Esta funcao recupera os dados do banco a partir do permalink e retorna o boleto 
+		 * gerado usando esses dados.
+		 */
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -198,23 +207,26 @@ public class boletoBradesco extends HttpServlet
 				"boleto_instrucao3", "boleto_instrucao4", "boleto_instrucao5", "boleto_instrucao6", 
 				"boleto_instrucao7", "boleto_instrucao8", "permalink"};
 		Hashtable<String, String> dados = new Hashtable<String, String>();
-
+		
+		//recupera os dados do banco e os armazena numa hashtable
 	    stmt = conn.createStatement();
 	    if( stmt.execute("SELECT * FROM `geradorboletos`.`boletobradesco` WHERE permalink=\'"+permalink+"\'") )
 	    {
 	        rs = stmt.getResultSet();
 	        while( rs.next() )
-	        {
 	        	for(int i=0;i<valores.length;i++)
-	        	{
 	        		dados.put(valores[i], rs.getString(valores[i]));
-	        	}
-	        }
 	        valores = null;
 	    }
-	    
 		
-		
+	    //verifica se a hashtable esta vazia, se esta, e porque nao ha nenhum boleto armazenado no banco
+	    //para esse permalink
+	    if(dados.isEmpty())
+	    	throw new NoBoletoException("0: Boleto nao encontrado!");
+
+		/**
+		 * Inicia a geracao do boleto.
+		 */
 		//INFORMANDO DADOS SOBRE O CEDENTE.
 		String cedente_nome = dados.get("cedente_nome");
 		String cedente_cnpj = dados.get("cedente_cnpj");
@@ -242,7 +254,6 @@ public class boletoBradesco extends HttpServlet
         enderecoSac.setLogradouro(enderecosac_logradouro);
         enderecoSac.setNumero(enderecosac_numero);
         sacado.addEndereco(enderecoSac);
-
         
         //INFORMANDO DADOS SOBRE O SACADOR AVALISTA.
     	String sacadoravalista_nome = dados.get("sacadoravalista_nome");
@@ -329,20 +340,25 @@ public class boletoBradesco extends HttpServlet
         boleto.setInstrucao1(boleto_instrucao6);
         boleto.setInstrucao1(boleto_instrucao7);
         boleto.setInstrucao1(boleto_instrucao8);
-
+		/**
+		 * Termina a geracao do boleto.
+		 */
+        
 		return boleto;
     }
 	
 	
 	private static BigDecimal BigDecimal(String value)
 	{
-		// TODO Auto-generated method stub
+		//Metodo para transformar strings em BigDecimal
+		//feito pois a classe BigDecimal nao possui tal metodo
 		return BigDecimal.valueOf( Double.parseDouble(value) );
 	}
 
 	private static Date Date(String data)
 	{
-		// TODO Auto-generated method stub 
+		//Metodo para transformar strings em Date
+		//feito pois a classe Date nao possui tal metodo (descontinuado)
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		try
 		{
@@ -362,21 +378,30 @@ public class boletoBradesco extends HttpServlet
 	public void doGet (HttpServletRequest req, HttpServletResponse res)
 	throws ServletException, IOException
 	{
-		String permalink = req.getPathInfo().replaceAll("/", ""); 
+		String permalink = req.getPathInfo().replaceAll("/", "");
+		OutputStream output = res.getOutputStream();
 		if( permalink.length() == PERMALINK_LENGTH )
-		{
+		{ //se o permalink tem o tamanho correto comeca a processar
 			Boleto boleto = null;
 			String saida = "";
-			try {
+			try
+			{
 				boleto = geraBoleto(permalink);
-			} catch (SQLException e) {
+			}
+			catch (SQLException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				saida = e.getMessage();
+			}
+			catch( NoBoletoException e )
+			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				saida = e.getMessage();
 			}
 			if( boleto == null )
 			{
-				OutputStream output = res.getOutputStream();
 				output.write(saida.getBytes());
 			}
 			else
@@ -387,43 +412,46 @@ public class boletoBradesco extends HttpServlet
 				res.setContentType("application/pdf");
 				res.setHeader("Content-Disposition", "attachment; filename=boleto.pdf");
 		
-				OutputStream output = res.getOutputStream();
 				output.write(pdfAsBytes);
 			}
 			res.flushBuffer();
 		}
-		else
+		else //se o permalink nao tiver o tamanho correto
 		{
-			OutputStream output = res.getOutputStream();
-			output.write((req.getPathInfo()+" "+req.getPathInfo().length()).getBytes());
-	
+			output.write(("0: Permalink invalido! Esperado comprimento 40, obtido comprimento "+permalink.length()+"!")
+				  .getBytes());
 			res.flushBuffer();
 		}
-
-		
-		/*PrintWriter out = res.getWriter();
-		out.println("Hello, Brave new World!");
-		out.close();*/
+		output.close();
 	}
 
 	public void doPost (HttpServletRequest req, HttpServletResponse res)
 	throws ServletException, IOException
 	{
-		String permalink = req.getPathInfo().replaceAll("/", ""); 
+		String permalink = req.getPathInfo().replaceAll("/", "");
+		OutputStream output = res.getOutputStream();
 		if( permalink.length() == PERMALINK_LENGTH )
 		{
 			Boleto boleto = null;
 			String saida = "";
-			try {
+			try
+			{
 				boleto = geraBoleto(permalink);
-			} catch (SQLException e) {
+			}
+			catch (SQLException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				saida = e.getMessage();
+			}
+			catch( NoBoletoException e )
+			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				saida = e.getMessage();
 			}
 			if( boleto == null )
 			{
-				OutputStream output = res.getOutputStream();
 				output.write(saida.getBytes());
 			}
 			else
@@ -433,7 +461,6 @@ public class boletoBradesco extends HttpServlet
 		
 				res.setContentType("application/pdf");
 				res.setHeader("Content-Disposition", "attachment; filename=boleto.pdf");
-				OutputStream output = res.getOutputStream();
 				output.write(pdfAsBytes);
 			}
 			res.flushBuffer();
@@ -452,14 +479,10 @@ public class boletoBradesco extends HttpServlet
 				saida = e.getMessage();
 			}
 	
-			OutputStream output = res.getOutputStream();
 			output.write(saida.getBytes());
 	
 			res.flushBuffer();
 		}
-		
-		/*PrintWriter out = res.getWriter();
-		out.println("Hello, Brave new World!");
-		out.close();*/
+		output.close();
 	}
 }
