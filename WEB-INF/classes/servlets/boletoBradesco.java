@@ -11,6 +11,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 
 
 import javax.servlet.http.*;
@@ -49,25 +51,9 @@ public class boletoBradesco extends HttpServlet
 	private static String user = "gerador";
 	private static String password = "gerador";
 	
-	
-	
-	public static String recebePost(HttpServletRequest request) throws SQLException
-    {
-		/**
-		 * Este metodo recebe os dados via post para a geracao de um boleto, os armazena no
-		 * banco de dados e retorna o permalink para ser acesso via URL.
-		 */
-
-		String empresa_id = "1";
-		
-		//INFORMANDO DADOS SOBRE O CEDENTE.
-		String cedente_nome = request.getParameter("cedente_nome");
-		String cedente_cnpj = request.getParameter("cedente_cnpj");
-
-        //INFORMANDO DADOS SOBRE O SACADO.
-		String sacado_nome = request.getParameter("sacado_nome");
-		String sacado_cpf = request.getParameter("sacado_cpf");
-
+	private boolean verificaEnderecoSacado(HttpServletRequest request)
+	{
+		//if( request.getParameter("name") == null )
         // Informando o endereço do sacado.
         String enderecosac_uf = request.getParameter("enderecosac_uf");
         String enderecosac_localidade = request.getParameter("enderecosac_localidade");
@@ -75,51 +61,108 @@ public class boletoBradesco extends HttpServlet
         String enderecosac_bairro = request.getParameter("enderecosac_bairro");
         String enderecosac_logradouro = request.getParameter("enderecosac_logradouro");
         String enderecosac_numero = request.getParameter("enderecosac_numero");
+        
+        return true;
+	}
+	
+	public static String recebePost(HttpServletRequest request) throws SQLException
+    {
+		/**
+		 * Este metodo recebe os dados via post para a geracao de um boleto, os armazena no
+		 * banco de dados e retorna o permalink para ser acesso via URL.
+		 */
+		String temp = "";
+		String empresa_id = "1";
+		Hashtable<String, String> dadosBoleto = new Hashtable<String, String>();
+		
+		//INFORMANDO DADOS SOBRE O CEDENTE.
+		dadosBoleto.put("cedente_nome", request.getParameter("cedente_nome") );
+		dadosBoleto.put("cedente_cnpj", request.getParameter("cedente_cnpj") );
+
+        //INFORMANDO DADOS SOBRE O SACADO.
+		dadosBoleto.put("sacado_nome", request.getParameter("sacado_nome") );
+		dadosBoleto.put("sacado_cpf", request.getParameter("sacado_cpf") );
+		
+        // Informando o endereço do sacado.
+        dadosBoleto.put("enderecosac_uf", request.getParameter("enderecosac_uf") );
+        dadosBoleto.put("enderecosac_localidade", request.getParameter("enderecosac_localidade") );
+        dadosBoleto.put("enderecosac_cep", request.getParameter("enderecosac_cep") );
+        dadosBoleto.put("enderecosac_bairro", request.getParameter("enderecosac_bairro") );
+        dadosBoleto.put("enderecosac_logradouro", request.getParameter("enderecosac_logradouro") );
+        dadosBoleto.put("enderecosac_numero", request.getParameter("enderecosac_numero") );
 
         //INFORMANDO DADOS SOBRE O SACADOR AVALISTA.
-    	String sacadoravalista_nome = request.getParameter("sacadoravalista_nome");
-    	String sacadoravalista_cnpj = request.getParameter("sacadoravalista_cnpj");
+    	dadosBoleto.put("sacadoravalista_nome", request.getParameter("sacadoravalista_nome") );
+    	dadosBoleto.put("sacadoravalista_cnpj", request.getParameter("sacadoravalista_cnpj") );
 
         //Informando o endereço do sacador avalista.
-        String enderecosacaval_uf = request.getParameter("enderecosacaval_uf");
-        String enderecosacaval_localidade = request.getParameter("enderecosacaval_localidade");
-        String enderecosacaval_cep = request.getParameter("enderecosacaval_cep");
-        String enderecosacaval_bairro = request.getParameter("enderecosacaval_bairro");
-        String enderecosacaval_logradouro = request.getParameter("enderecosacaval_logradouro");
-        String enderecosacaval_numero = request.getParameter("enderecosacaval_numero");
+    	temp = request.getParameter("enderecosacaval_uf");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("enderecosacaval_uf", temp );
+        temp = request.getParameter("enderecosacaval_localidade");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("enderecosacaval_localidade", temp );
+        temp = request.getParameter("enderecosacaval_cep");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("enderecosacaval_cep", temp );
+        temp = request.getParameter("enderecosacaval_bairro");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("enderecosacaval_bairro", temp );
+        temp = request.getParameter("enderecosacaval_logradouro");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("enderecosacaval_logradouro", temp );
+        temp = request.getParameter("enderecosacaval_numero");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("enderecosacaval_numero", temp );
 
         //INFORMANDO OS DADOS SOBRE O TITULO.
         //Informando dados sobre a conta bancaria do titulo.
-        //String contabancaria = "bradesco";
-        String contabancaria_numerodaconta = "123456";
-        String contabancaria_numerodaconta_digito = "0";
-        String contabancaria_carteira = "30";
-        String contabancaria_agencia = "1234";
-        String contabancaria_agencia_digito = "1";
+        dadosBoleto.put("contabancaria_numerodaconta", request.getParameter("contabancaria_numerodaconta") );
+        dadosBoleto.put("contabancaria_numerodaconta_digito", request.getParameter("contabancaria_numerodaconta_digito") );
+        dadosBoleto.put("contabancaria_carteira", request.getParameter("contabancaria_carteira") );
+        dadosBoleto.put("contabancaria_agencia", request.getParameter("contabancaria_agencia") );
+        dadosBoleto.put("contabancaria_agencia_digito", request.getParameter("contabancaria_agencia_digito") );
 
-        String titulo_numerododocumento = request.getParameter("titulo_numerododocumento");
-        String titulo_nossonumero = request.getParameter("titulo_nossonumero");
-        String titulo_digitodonossonumero = request.getParameter("titulo_digitodonossonumero");
-        String titulo_valor = request.getParameter("titulo_valor");
-        String titulo_datadodocumento = request.getParameter("titulo_datadodocumento");
-        String titulo_datadovencimento = request.getParameter("titulo_datadovencimento");
-        String titulo_desconto = request.getParameter("titulo_desconto");
-        String titulo_deducao = request.getParameter("titulo_deducao");
-        String titulo_mora = request.getParameter("titulo_mora");
-        String titulo_acrecimo = request.getParameter("titulo_acrecimo");
-        String titulo_valorcobrado = request.getParameter("titulo_valorcobrado");
+        //dadosBoleto.put("titulo_numerododocumento", request.getParameter("titulo_numerododocumento") );
+        dadosBoleto.put("titulo_nossonumero", request.getParameter("titulo_nossonumero") );
+        dadosBoleto.put("titulo_digitodonossonumero", request.getParameter("titulo_digitodonossonumero") );
+        dadosBoleto.put("titulo_valor", request.getParameter("titulo_valor") );
+        dadosBoleto.put("titulo_datadodocumento", request.getParameter("titulo_datadodocumento") );
+        dadosBoleto.put("titulo_datadovencimento", request.getParameter("titulo_datadovencimento") );
+        dadosBoleto.put("titulo_desconto", request.getParameter("titulo_desconto") );
+        dadosBoleto.put("titulo_deducao", request.getParameter("titulo_deducao") );
+        dadosBoleto.put("titulo_mora", request.getParameter("titulo_mora") );
+        dadosBoleto.put("titulo_acrecimo", request.getParameter("titulo_acrecimo") );
+        dadosBoleto.put("titulo_valorcobrado", request.getParameter("titulo_valorcobrado") );
 
         //INFORMANDO OS DADOS SOBRE O BOLETO.
-        String boleto_localpagamento = request.getParameter("titulo_mora");
-        String boleto_instrucaoaosacado = request.getParameter("titulo_mora");
-        String boleto_instrucao1 = request.getParameter("boleto_instrucao1");
-        String boleto_instrucao2 = request.getParameter("boleto_instrucao2");
-        String boleto_instrucao3 = request.getParameter("boleto_instrucao3");
-        String boleto_instrucao4 = request.getParameter("boleto_instrucao4");
-        String boleto_instrucao5 = request.getParameter("boleto_instrucao5");
-        String boleto_instrucao6 = request.getParameter("boleto_instrucao6");
-        String boleto_instrucao7 = request.getParameter("boleto_instrucao7");
-        String boleto_instrucao8 = request.getParameter("boleto_instrucao8");
+        dadosBoleto.put("boleto_localpagamento", request.getParameter("boleto_localpagamento") );
+        dadosBoleto.put("boleto_instrucaoaosacado", request.getParameter("boleto_instrucaoaosacado") );
+        
+        temp = request.getParameter("boleto_instrucao1");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao1", request.getParameter("boleto_instrucao1") );
+        temp = request.getParameter("boleto_instrucao2");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao2", request.getParameter("boleto_instrucao2") );
+        temp = request.getParameter("boleto_instrucao3");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao3", request.getParameter("boleto_instrucao3") );
+        temp = request.getParameter("boleto_instrucao4");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao4", request.getParameter("boleto_instrucao4") );
+        temp = request.getParameter("boleto_instrucao5");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao5", request.getParameter("boleto_instrucao5") );
+        temp = request.getParameter("boleto_instrucao6");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao6", request.getParameter("boleto_instrucao6") );
+        temp = request.getParameter("boleto_instrucao7");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao7", request.getParameter("boleto_instrucao7") );
+        temp = request.getParameter("boleto_instrucao8");
+        if( temp != null && temp.length() > 0 )
+        	dadosBoleto.put("boleto_instrucao8", request.getParameter("boleto_instrucao8") );
         
         Connection conn = null;
 		Statement stmt = null;
@@ -129,31 +172,26 @@ public class boletoBradesco extends HttpServlet
 		conn = DriverManager.getConnection("jdbc:mysql://localhost/"+database+"?user="+user+"&password="+password);
 		
 		
-		String campos = "(`empresa_id`, `cedente_nome`, `cedente_cnpj`, `sacado_nome`, `sacado_cpf`, `enderecosac_uf`, "+
-			"`enderecosac_localidade`, `enderecosac_cep`, `enderecosac_bairro`, `enderecosac_logradouro`, "+
-			"`enderecosac_numero`, `sacadoravalista_nome`, `sacadoravalista_cnpj`, `enderecosacaval_uf`, "+
-			"`enderecosacaval_localidade`, `enderecosacaval_cep`, `enderecosacaval_bairro`, "+
-			"`enderecosacaval_logradouro`, `enderecosacaval_numero`, `contabancaria_numerodaconta`, "+
-			"`contabancaria_numerodaconta_digito`, `contabancaria_carteira`, `contabancaria_agencia`, "+
-			"`contabancaria_agencia_digito`, `titulo_numerododocumento`, `titulo_nossonumero`, "+
-			"`titulo_digitodonossonumero`, `titulo_valor`, `titulo_datadodocumento`, `titulo_datadovencimento`, "+
-			"`titulo_desconto`, `titulo_deducao`, `titulo_mora`, `titulo_acrecimo`, `titulo_valorcobrado`, "+
-			"`boleto_localpagamento`, `boleto_instrucaoaosacado`, `boleto_instrucao1`, `boleto_instrucao2`, "+
-			"`boleto_instrucao3`, `boleto_instrucao4`, `boleto_instrucao5`, `boleto_instrucao6`, `boleto_instrucao7`, "+
-			"`boleto_instrucao8`, `permalink`)";
-		String valores = "(\'"+empresa_id+"\', \'"+cedente_nome+"\', \'"+cedente_cnpj+"\', \'"+sacado_nome+"\', \'"+sacado_cpf+"\', \'"+enderecosac_uf+"\', \'"+
-			enderecosac_localidade+"\', \'"+enderecosac_cep+"\', \'"+enderecosac_bairro+"\', \'"+enderecosac_logradouro+"\', \'"+
-			enderecosac_numero+"\', \'"+sacadoravalista_nome+"\', \'"+sacadoravalista_cnpj+"\', \'"+enderecosacaval_uf+"\', \'"+
-			enderecosacaval_localidade+"\', \'"+enderecosacaval_cep+"\', \'"+enderecosacaval_bairro+"\', \'"+
-			enderecosacaval_logradouro+"\', \'"+enderecosacaval_numero+"\', \'"+
-			contabancaria_numerodaconta+"\', \'"+contabancaria_numerodaconta_digito+"\', \'"+contabancaria_carteira+"\', \'"+
-			contabancaria_agencia+"\', \'"+contabancaria_agencia_digito+"\', \'"+titulo_numerododocumento+"\', \'"+
-			titulo_nossonumero+"\', \'"+titulo_digitodonossonumero+"\', \'"+titulo_valor+"\', \'"+titulo_datadodocumento+"\', \'"+
-			titulo_datadovencimento+"\', \'"+titulo_desconto+"\', \'"+titulo_deducao+"\', \'"+titulo_mora+"\', \'"+
-			titulo_acrecimo+"\', \'"+titulo_valorcobrado+"\', \'"+boleto_localpagamento+"\', \'"+boleto_instrucaoaosacado+"\', \'"+
-			boleto_instrucao1+"\', \'"+boleto_instrucao2+"\', \'"+boleto_instrucao3+"\', \'"+boleto_instrucao4+"\', \'"+
-			boleto_instrucao5+"\', \'"+boleto_instrucao6+"\', \'"+boleto_instrucao7+"\', \'"+boleto_instrucao8+"\', \'"+
-			permalink+"\')";
+		String campos = "(`permalink`, `empresa_id`, `";
+		String valores = "(\'"+permalink+"\', \'"+empresa_id+"\', \'";
+		Iterator<Map.Entry<String, String>> it = dadosBoleto.entrySet().iterator();
+		int i = 0, size = dadosBoleto.size();
+		while (it.hasNext())
+		{
+			i++;
+			Map.Entry<String, String> entry = it.next();
+
+			if( i == size )
+			{
+				campos = campos.concat( entry.getKey()+"`)" );
+				valores = valores.concat( entry.getValue()+"\')" );
+			}
+			else
+			{
+				campos = campos.concat( entry.getKey()+"`, `" );
+				valores = valores.concat( entry.getValue()+"\', \'" );
+			}
+		}
 
 		//tenta inserir os dados no banco ate que o permalink gerado atual seja aceito 
 		boolean teste_permalink = true;
@@ -193,21 +231,21 @@ public class boletoBradesco extends HttpServlet
 		conn = DriverManager.getConnection("jdbc:mysql://localhost/"+database+"?user="+user+"&password="+password);
 		
 		String[] valores = {
-				"cedente_nome", "cedente_cnpj", "sacado_nome", "sacado_cpf", 
+				"id", "cedente_nome", "cedente_cnpj", "sacado_nome", "sacado_cpf", 
 				"enderecosac_uf", "enderecosac_localidade", "enderecosac_cep", 
 				"enderecosac_bairro", "enderecosac_logradouro", "enderecosac_numero", 
 				"sacadoravalista_nome", "sacadoravalista_cnpj", "enderecosacaval_uf", 
 				"enderecosacaval_localidade", "enderecosacaval_cep", "enderecosacaval_bairro", 
 				"enderecosacaval_logradouro", "enderecosacaval_numero", "contabancaria_numerodaconta", 
 				"contabancaria_numerodaconta_digito", "contabancaria_carteira", "contabancaria_agencia", 
-				"contabancaria_agencia_digito", "titulo_numerododocumento", "titulo_nossonumero", 
+				"contabancaria_agencia_digito", "titulo_nossonumero", 
 				"titulo_digitodonossonumero", "titulo_valor", "titulo_datadodocumento", "titulo_datadovencimento", 
 				"titulo_desconto", "titulo_deducao", "titulo_mora", "titulo_acrecimo", "titulo_valorcobrado", 
 				"boleto_localpagamento", "boleto_instrucaoaosacado", "boleto_instrucao1", "boleto_instrucao2", 
 				"boleto_instrucao3", "boleto_instrucao4", "boleto_instrucao5", "boleto_instrucao6", 
 				"boleto_instrucao7", "boleto_instrucao8", "permalink"};
 		Hashtable<String, String> dados = new Hashtable<String, String>();
-		
+
 		//recupera os dados do banco e os armazena numa hashtable
 	    stmt = conn.createStatement();
 	    if( stmt.execute("SELECT * FROM `geradorboletos`.`boletobradesco` WHERE permalink=\'"+permalink+"\'") )
@@ -279,18 +317,20 @@ public class boletoBradesco extends HttpServlet
         //INFORMANDO OS DADOS SOBRE O TITULO.
         //Informando dados sobre a conta bancaria do titulo.
         //String contabancaria = "BRADESCO";
-        int contabancaria_numerodaconta = 123456;
-        String contabancaria_numerodaconta_digito = "0";
-        Integer contabancaria_carteira = 30;
-        int contabancaria_agencia = 1234;
-        String contabancaria_agencia_digito = "1";
+        int contabancaria_numerodaconta = Integer.parseInt( dados.get("contabancaria_numerodaconta") );
+        String contabancaria_numerodaconta_digito = dados.get("contabancaria_numerodaconta_digito");
+        Integer contabancaria_carteira = Integer.parseInt( dados.get("contabancaria_carteira") );
+        int contabancaria_agencia = Integer.parseInt( dados.get("contabancaria_agencia") );
+        String contabancaria_agencia_digito = dados.get("contabancaria_agencia_digito");
         ContaBancaria contaBancaria = new ContaBancaria(BancosSuportados.BANCO_BRADESCO.create());
         contaBancaria.setNumeroDaConta(new NumeroDaConta(contabancaria_numerodaconta, contabancaria_numerodaconta_digito));
         contaBancaria.setCarteira(new Carteira(contabancaria_carteira));
         contaBancaria.setAgencia(new Agencia(contabancaria_agencia, contabancaria_agencia_digito));
 
-        
-        String titulo_numerododocumento = dados.get("titulo_numerododocumento");
+        //#Número de controle do cedente para o referido título. Não confundir com o nosso número. 
+        String titulo_numerododocumento = "50000";//dados.get("id");
+        //Código fornecido pelo Banco para identificação do título ou identificação 
+        //do título atribuído pelo emissor do título de cobrança. 
         String titulo_nossonumero = dados.get("titulo_nossonumero");
         String titulo_digitodonossonumero = dados.get("titulo_digitodonossonumero");
         String titulo_valor = dados.get("titulo_valor");
@@ -430,6 +470,9 @@ public class boletoBradesco extends HttpServlet
 	{
 		String permalink = req.getPathInfo().replaceAll("/", "");
 		OutputStream output = res.getOutputStream();
+		
+		req.setCharacterEncoding("UTF-8"); 
+		
 		if( permalink.length() == PERMALINK_LENGTH )
 		{
 			Boleto boleto = null;
