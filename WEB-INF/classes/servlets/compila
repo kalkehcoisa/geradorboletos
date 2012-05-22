@@ -1,0 +1,2 @@
+javac *.java -classpath servlet-api-2.5.jar:Bopepo-20110415-bin.jar:commons-lang-2.6.jar
+/etc/init.d/tomcat restart
