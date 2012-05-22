@@ -51,20 +51,6 @@ public class boletoBradesco extends HttpServlet
 	private static String user = "gerador";
 	private static String password = "gerador";
 	
-	private boolean verificaEnderecoSacado(HttpServletRequest request)
-	{
-		//if( request.getParameter("name") == null )
-        // Informando o endereço do sacado.
-        String enderecosac_uf = request.getParameter("enderecosac_uf");
-        String enderecosac_localidade = request.getParameter("enderecosac_localidade");
-        String enderecosac_cep = request.getParameter("enderecosac_cep");
-        String enderecosac_bairro = request.getParameter("enderecosac_bairro");
-        String enderecosac_logradouro = request.getParameter("enderecosac_logradouro");
-        String enderecosac_numero = request.getParameter("enderecosac_numero");
-        
-        return true;
-	}
-	
 	public static String recebePost(HttpServletRequest request) throws SQLException
     {
 		/**
@@ -420,6 +406,9 @@ public class boletoBradesco extends HttpServlet
 	{
 		String permalink = req.getPathInfo().replaceAll("/", "");
 		OutputStream output = res.getOutputStream();
+		
+		req.setCharacterEncoding("UTF-8");
+
 		if( permalink.length() == PERMALINK_LENGTH )
 		{ //se o permalink tem o tamanho correto comeca a processar
 			Boleto boleto = null;
