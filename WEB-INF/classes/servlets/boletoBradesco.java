@@ -231,7 +231,7 @@ public class boletoBradesco extends HttpServlet
 				"boleto_instrucao3", "boleto_instrucao4", "boleto_instrucao5", "boleto_instrucao6", 
 				"boleto_instrucao7", "boleto_instrucao8", "permalink"};
 		Hashtable<String, String> dados = new Hashtable<String, String>();
-
+		String temp = "";
 		//recupera os dados do banco e os armazena numa hashtable
 	    stmt = conn.createStatement();
 	    if( stmt.execute("SELECT * FROM `geradorboletos`.`boletobradesco` WHERE permalink=\'"+permalink+"\'") )
@@ -239,7 +239,16 @@ public class boletoBradesco extends HttpServlet
 	        rs = stmt.getResultSet();
 	        while( rs.next() )
 	        	for(int i=0;i<valores.length;i++)
-	        		dados.put(valores[i], rs.getString(valores[i]));
+	        		try
+	        		{
+	        			dados.put(valores[i], rs.getString(valores[i]));
+	        		}
+	        		catch(Exception e)
+	        		{
+	        			temp += " |"+valores[i]+"| ";
+	        		}
+	        		if( temp.length() > 0 )
+	        			throw new NoBoletoException(temp);
 	        valores = null;
 	    }
 		
