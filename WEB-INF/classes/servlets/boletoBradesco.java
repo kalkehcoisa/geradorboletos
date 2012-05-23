@@ -241,7 +241,10 @@ public class boletoBradesco extends HttpServlet
 	        	for(int i=0;i<valores.length;i++)
 	        		try
 	        		{
-	        			dados.put(valores[i], rs.getString(valores[i]));
+	        			if( rs.getString(valores[i]) != null )
+	        				dados.put(valores[i], rs.getString(valores[i]));
+	        			else
+	        				dados.put(valores[i], "");
 	        		}
 	        		catch(Exception e)
 	        		{
@@ -368,13 +371,20 @@ public class boletoBradesco extends HttpServlet
         boleto.setLocalPagamento(boleto_localpagamento);
         boleto.setInstrucaoAoSacado(boleto_instrucaoaosacado);
         boleto.setInstrucao1(boleto_instrucao1);
-        boleto.setInstrucao1(boleto_instrucao2);
-        boleto.setInstrucao1(boleto_instrucao3);
-        boleto.setInstrucao1(boleto_instrucao4);
-        boleto.setInstrucao1(boleto_instrucao5);
-        boleto.setInstrucao1(boleto_instrucao6);
-        boleto.setInstrucao1(boleto_instrucao7);
-        boleto.setInstrucao1(boleto_instrucao8);
+        if( boleto_instrucao2.length() < 1 )
+        	boleto.setInstrucao2(boleto_instrucao2);
+        if( boleto_instrucao3.length() < 1 )
+        	boleto.setInstrucao3(boleto_instrucao3);
+        if( boleto_instrucao4.length() < 1 )
+        	boleto.setInstrucao4(boleto_instrucao4);
+        if( boleto_instrucao5.length() < 1 )
+        	boleto.setInstrucao5(boleto_instrucao5);
+        if( boleto_instrucao6.length() < 1 )
+        	boleto.setInstrucao6(boleto_instrucao6);
+        if( boleto_instrucao7.length() < 1 )
+        	boleto.setInstrucao7(boleto_instrucao7);
+        if( boleto_instrucao8.length() < 1 )
+        	boleto.setInstrucao8(boleto_instrucao8);
 		/**
 		 * Termina a geracao do boleto.
 		 */
