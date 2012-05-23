@@ -513,7 +513,7 @@ public class boletoBradesco extends HttpServlet
 			{
 				saida = recebePost(req);
 			}
-			catch (SQLException e)
+			catch (Exception e)
 			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
