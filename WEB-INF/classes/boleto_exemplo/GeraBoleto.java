@@ -1,4 +1,4 @@
-package boletos;
+package boleto_exemplo;
 
 import java.io.File;
 import java.io.IOException;

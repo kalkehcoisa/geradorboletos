@@ -109,7 +109,7 @@ public class boletoBradesco extends HttpServlet
         dadosBoleto.put("contabancaria_agencia", request.getParameter("contabancaria_agencia") );
         dadosBoleto.put("contabancaria_agencia_digito", request.getParameter("contabancaria_agencia_digito") );
 
-        //dadosBoleto.put("titulo_numerododocumento", request.getParameter("titulo_numerododocumento") );
+        dadosBoleto.put("titulo_numerododocumento", request.getParameter("titulo_numerododocumento") );
         dadosBoleto.put("titulo_nossonumero", request.getParameter("titulo_nossonumero") );
         dadosBoleto.put("titulo_digitodonossonumero", request.getParameter("titulo_digitodonossonumero") );
         dadosBoleto.put("titulo_valor", request.getParameter("titulo_valor") );
@@ -224,7 +224,7 @@ public class boletoBradesco extends HttpServlet
 				"enderecosacaval_localidade", "enderecosacaval_cep", "enderecosacaval_bairro", 
 				"enderecosacaval_logradouro", "enderecosacaval_numero", "contabancaria_numerodaconta", 
 				"contabancaria_numerodaconta_digito", "contabancaria_carteira", "contabancaria_agencia", 
-				"contabancaria_agencia_digito", "titulo_nossonumero", 
+				"contabancaria_agencia_digito", "titulo_nossonumero", "titulo_numerododocumento",
 				"titulo_digitodonossonumero", "titulo_valor", "titulo_datadodocumento", "titulo_datadovencimento", 
 				"titulo_desconto", "titulo_deducao", "titulo_mora", "titulo_acrecimo", "titulo_valorcobrado", 
 				"boleto_localpagamento", "boleto_instrucaoaosacado", "boleto_instrucao1", "boleto_instrucao2", 
@@ -326,7 +326,7 @@ public class boletoBradesco extends HttpServlet
         contaBancaria.setAgencia(new Agencia(contabancaria_agencia, contabancaria_agencia_digito));
 
         //#Número de controle do cedente para o referido título. Não confundir com o nosso número. 
-        String titulo_numerododocumento = "50000";//dados.get("id");
+        String titulo_numerododocumento = dados.get("titulo_numerododocumento");//dados.get("id");
         //Código fornecido pelo Banco para identificação do título ou identificação 
         //do título atribuído pelo emissor do título de cobrança. 
         String titulo_nossonumero = dados.get("titulo_nossonumero");
